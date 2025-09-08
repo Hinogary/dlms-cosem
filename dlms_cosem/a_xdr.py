@@ -113,7 +113,7 @@ class AXdrDecoder:
 
     @property
     def buffer_empty(self) -> bool:
-        return self.pointer == len(self.buffer)
+        return self.pointer >= len(self.buffer)
 
     def decode(self, data: bytes):
         # clear previous results
