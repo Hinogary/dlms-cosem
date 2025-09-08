@@ -2,6 +2,7 @@ import abc
 import datetime
 from typing import *
 from typing import List, Optional
+import struct
 
 import attr
 
@@ -125,6 +126,10 @@ class BooleanData(BaseDlmsData):
 class BitStringData(BaseDlmsData):
     TAG = 4
     LENGTH = VARIABLE_LENGTH
+
+    @classmethod
+    def from_bytes(cls, bytes_data: bytes):
+        return cls(bytes_data)
 
     def value_to_bytes(self) -> bytes:
         return self.value
@@ -333,6 +338,10 @@ class Float32Data(BaseDlmsData):
     TAG = 23
     LENGTH = 4
 
+    @classmethod
+    def from_bytes(cls, bytes_data: bytes):
+        return cls(struct.unpack('>f', bytes_data)[0])
+
 
 @attr.s(auto_attribs=True)
 class Float64Data(BaseDlmsData):
@@ -342,6 +351,10 @@ class Float64Data(BaseDlmsData):
 
     TAG = 24
     LENGTH = 8
+
+    @classmethod
+    def from_bytes(cls, bytes_data: bytes):
+        return cls(struct.unpack('>d', bytes_data)[0])
 
 
 @attr.s(auto_attribs=True)
