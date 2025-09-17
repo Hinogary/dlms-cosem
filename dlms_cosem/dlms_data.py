@@ -50,7 +50,7 @@ class BaseDlmsData(AbstractDlmsData):
         out.append(self.TAG)
         value_bytes = self.value_to_bytes()
         if self.LENGTH == VARIABLE_LENGTH:
-            out.append(len(value_bytes))
+            out.extend(encode_variable_integer(len(value_bytes)))
         out.extend(value_bytes)
         return bytes(out)
 
@@ -501,9 +501,9 @@ class DlmsDataParser:
     def decode_data(self, data_class) -> AbstractDlmsData:
         if data_class.LENGTH == VARIABLE_LENGTH:
             length = self.decode_variable_integer()
-            return data_class.from_bytes(self.get_bytes(length))
+            return data_class.from_bytes(bytes(self.get_bytes(length)))
         else:
-            return data_class.from_bytes(self.get_bytes(data_class.LENGTH))
+            return data_class.from_bytes(bytes(self.get_bytes(data_class.LENGTH)))
 
     def decode_array(self) -> DataArray:
         item_count = self.decode_variable_integer()
@@ -573,14 +573,13 @@ def encode_variable_integer(length: int):
         encoded_length = 1
         while True:
             try:
-                length.to_bytes(encoded_length, "big")
+                _bytes = length.to_bytes(encoded_length, "big")
             except OverflowError:
                 encoded_length += 1
                 continue
             break
 
         length_byte = (0b10000000 + encoded_length).to_bytes(1, "big")
-        return length_byte + length.to_bytes(encoded_length, "big")
-
+        return length_byte + _bytes
     else:
         return length.to_bytes(1, "big")
